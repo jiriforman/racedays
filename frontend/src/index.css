@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Keep Leaflet map from leaking out of its container */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+}
