@@ -31,4 +31,5 @@ export interface Filters {
   countries: string[]
   dateFrom: string
   dateTo: string
+  age: string
 }
