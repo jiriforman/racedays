@@ -11,7 +11,7 @@ interface Props {
 export default function RaceList({ races, loading, selectedRaceId, onSelectRace }: Props) {
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-32 text-gray-400 text-sm">
+      <div className="flex items-center justify-center h-32 text-white/30 text-sm">
         Loading races…
       </div>
     )
@@ -20,16 +20,17 @@ export default function RaceList({ races, loading, selectedRaceId, onSelectRace 
   if (races.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-32 gap-1 text-center px-4">
-        <span className="text-gray-400 text-sm">No races found</span>
-        <span className="text-gray-300 text-xs">Try adjusting the filters</span>
+        <span className="text-white/30 text-sm">No races found</span>
+        <span className="text-white/20 text-xs">Try adjusting the filters</span>
       </div>
     )
   }
 
   return (
-    <div>
-      <div className="px-4 py-2 text-xs font-medium text-gray-400 border-b border-gray-100 bg-gray-50">
-        {races.length} race{races.length !== 1 ? 's' : ''}
+    <div className="bg-surface-700">
+      <div className="px-4 py-2 text-xs font-medium text-white/30 border-b border-white/[0.06] flex items-center justify-between">
+        <span>{races.length} race{races.length !== 1 ? 's' : ''}</span>
+        <span className="font-mono text-white/20">sorted by date</span>
       </div>
       {races.map(race => (
         <RaceCard

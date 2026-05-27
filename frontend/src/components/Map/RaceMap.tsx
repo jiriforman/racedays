@@ -1,12 +1,28 @@
 import { useEffect } from 'react'
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet'
+import L from 'leaflet'
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet'
 import { Race } from '../../types/race'
 
-const DISCIPLINE_COLOR: Record<string, string> = {
-  obstacle: '#F97316',
-  bike_road: '#22C55E',
-  bike_mtb: '#10B981',
-  bike_gravel: '#14B8A6',
+const DISCIPLINE_EMOJI: Record<string, string> = {
+  obstacle: '🏃',
+  bike_road: '🚴',
+  bike_mtb: '🚵',
+  bike_gravel: '⛰️',
+}
+
+function createRaceIcon(race: Race, isSelected: boolean): L.DivIcon {
+  const emoji = DISCIPLINE_EMOJI[race.discipline] ?? '🏁'
+  const selectedClass = isSelected ? ' race-marker--selected' : ''
+  const star = race.is_kids_friendly
+    ? '<span class="race-marker__star">⭐</span>'
+    : ''
+  return L.divIcon({
+    className: '',
+    html: `<div class="race-marker${selectedClass}">${emoji}${star}</div>`,
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+    popupAnchor: [0, -22],
+  })
 }
 
 function FlyToSelected({ races, selectedId }: { races: Race[]; selectedId: string | null }) {
@@ -37,48 +53,21 @@ export default function RaceMap({ races, selectedRaceId, onSelectRace }: Props) 
       style={{ height: '100%', width: '100%' }}
     >
       <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        subdomains="abcd"
+        maxZoom={20}
       />
       <FlyToSelected races={races} selectedId={selectedRaceId} />
       {mappable.map(race => {
         const isSelected = selectedRaceId === race.id
-        const color = DISCIPLINE_COLOR[race.discipline] ?? '#6B7280'
         return (
-          <CircleMarker
-            key={race.id}
-            center={[race.lat!, race.lng!]}
-            radius={race.is_kids_friendly ? 10 : 8}
-            pathOptions={{
-              color: isSelected ? '#1D4ED8' : color,
-              fillColor: color,
-              fillOpacity: 0.85,
-              weight: isSelected ? 3 : 1.5,
-            }}
+          <Marker
+            key={`${race.id}-${isSelected}`}
+            position={[race.lat!, race.lng!]}
+            icon={createRaceIcon(race, isSelected)}
             eventHandlers={{ click: () => onSelectRace(race.id) }}
-          >
-            <Popup>
-              <div className="text-sm min-w-[160px]">
-                <p className="font-semibold text-gray-900">{race.title}</p>
-                <p className="text-gray-500 text-xs mt-0.5">
-                  {race.date_start} · {race.location_name}
-                </p>
-                {race.is_kids_friendly && (
-                  <p className="text-yellow-600 text-xs mt-0.5">⭐ Kids-friendly</p>
-                )}
-                {race.registration_url && (
-                  <a
-                    href={race.registration_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block mt-1.5 text-xs text-blue-600 font-medium hover:underline"
-                  >
-                    Register →
-                  </a>
-                )}
-              </div>
-            </Popup>
-          </CircleMarker>
+          />
         )
       })}
     </MapContainer>
